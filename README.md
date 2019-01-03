@@ -69,11 +69,11 @@ To debug CardCash Cookies with CardCash help:
 
 IT IS HIGHLY RECOMMENDED TO ALWAYS START WITH A `CUSTOMER LOGIN` CALL - YOU CAN'T GET YOUR MERCHANT PRICING, SAVE YOUR CART, OR PLACE A ORDER WITHOUT BEING LOGGED IN!
 
-`CC_API->CustomerLogin(emailAddr, pwd);`
+`$CC_API->CustomerLogin(emailAddr, pwd);`
 
 
 ## Examples
 
-[Get Orders & Get Cards](https://github.com/CardCashLLC/CardCash_API_SDK_C_Sharp/blob/master/CardCash_API/Examples/GetOrders/GetOrders/Program.cs)
+[Get Orders & Get Cards](https://github.com/CardCashLLC/CardCash_API_SDK_PHP/blob/master/examples/getOrders.php)
 
-[Place a Order](https://github.com/CardCashLLC/CardCash_API_SDK_C_Sharp/blob/master/CardCash_API/Examples/PlaceOrder/PlaceOrder/Program.cs)
+[Place a Order](https://github.com/CardCashLLC/CardCash_API_SDK_PHP/blob/master/examples/placeOrder.php)
