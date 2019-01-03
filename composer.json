@@ -1,0 +1,9 @@
+{
+  "name": "cardcash/cardcash-api-sdk-php",
+  "description": "CardCash Client Facing API SDK For Partners using PHP",
+  "autoload": {
+      "psr-4": {
+          "CardCash_API\\": "src/"
+      }
+  }
+}
