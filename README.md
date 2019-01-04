@@ -10,6 +10,7 @@ This is currently a simple CardCash API SDK written in PHP to assist bulk seller
 
 Package Manager
 
+`composer require cardcash/cardcash-api-sdk-php`
 
 ## Requirements
 
