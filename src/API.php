@@ -73,7 +73,11 @@ class API
             return json_decode($body);
         }
 
-        return $body;
+        if (!empty($body)) {
+          return $body;
+        }
+
+        return "OK";
     }
 
     protected function execute($method, $path, $jsonObject = null)
