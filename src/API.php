@@ -159,6 +159,13 @@ class API
         return $getCustomerResponse;
     }
 
+    public function GetDefaultPaymentOptions()
+    {
+        $getCustomerResponse = $this->execute(GET, "/v3/customers/payment-options");
+
+        return $getCustomerResponse;
+    }
+
     public function GetMerchants()
     {
         $merchantResponse = $this->execute(GET, "merchants/sell");

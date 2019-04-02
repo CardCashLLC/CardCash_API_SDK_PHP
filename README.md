@@ -23,6 +23,7 @@ Package Manager
 
 * `CustomerLogin(string email, string password)` - Logins a customer into their account.
 * `CreateCustomer(string firstName, string lastName, string email, string password)` - Will Only Create a brand new customer account in sandbox.
+$ `GetDefaultPaymentOptions` - Gets a list of a customer default payment options.
 * `GetCustomer` - Get your customer profile, this is used to get your paymentDetailID to place a order.
 * `GetMerchants` - Get a list of currently accepted merchants with merchant sell percentages agreed upon with your Account Manager, you must be LOGGED IN to see your sell percentages.
 * `RetrieveCart` - Will return a cart if one exists in the system.
