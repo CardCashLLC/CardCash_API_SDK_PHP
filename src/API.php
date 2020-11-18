@@ -12,11 +12,6 @@ class API
 
     const TIMEOUT = 30;
 
-    const GET = 'GET';
-    const POST = 'POST';
-    const PUT = 'PUT';
-    const DELETE = 'DELETE';
-
     function __construct($appID, $isProduction = false, $debug = false)
     {
         $this->_appID = $appID;
@@ -26,9 +21,9 @@ class API
           "https://sandbox-api.cardcash.com/v3/";
 
         $this->_headers = array(
-          'Accept:application/json',
-          'Content-Type:application/json',
-          'x-cc-app:' . $appID
+            'accept: application/json',
+            'content-type: application/json',
+            'x-cc-app:' . $appID
         );
     }
 
@@ -67,7 +62,6 @@ class API
     {
         $headerSize = curl_getinfo($ch, CURLINFO_HEADER_SIZE);
         $body       = substr($response, $headerSize);
-
         if (strpos($body, '{') === 0)
         {
             return json_decode($body);
@@ -76,68 +70,84 @@ class API
         if (!empty($body)) {
           return $body;
         }
-
         return "OK";
     }
 
     protected function execute($method, $path, $jsonObject = null)
     {
 
-        if ($path !== "session" && empty( $this->getMyCookie() ) )
-        {
-            $this->execute(POST, 'session');
-        }
+         if ($path !== "session" && empty( $this->getMyCookie() ) )
+         {
+             $this->execute('POST', 'session');
+         }
 
-        if ($this->_debug)
-        {
-            echo "Calling ".$method." ".$this->_uri.$path;
-            echo "\n\n";
-            echo "with APPID Cookie: ".$this->getMyCookie();
-            echo "\n\n";
-            echo "with headers: ";
-            print_r($this->getHeaders());
-            echo "\n\n";
-            echo "with data: ".$jsonObject;
-            echo "\n\n";
-        }
+         try {
 
-        $ch = curl_init();
-        curl_setopt($ch , CURLOPT_URL , $this->_uri.$path);
-        curl_setopt($ch , CURLOPT_HTTPHEADER , $this->getHeaders());
-        curl_setopt($ch , CURLOPT_TIMEOUT , $this->_timeout);
-        curl_setopt($ch , CURLOPT_HEADER , true);
-        curl_setopt($ch , CURLOPT_RETURNTRANSFER , true);
-        curl_setopt($ch , CURLOPT_FOLLOWLOCATION , true);
-        curl_setopt($ch , CURLOPT_COOKIE , $this->getMyCookie());
+            if ($this->_debug)
+            {
+                echo "Calling ".$method." ".$this->_uri.$path;
+                echo "\n\n";
+                echo "with APPID Cookie: ".$this->getMyCookie();
+                echo "\n\n";
+                echo "with headers: ";
+                print_r($this->getHeaders());
+                echo "\n\n";
+                echo "with data: ".$jsonObject;
+                echo "\n\n";
+            }
 
-        if (jsonObject != null && (POST == $method || PUT == $method))
-        {
-            curl_setopt($ch , CURLOPT_POSTFIELDS , $jsonObject);
-        }
+            $ch = curl_init();
 
-        if (POST == $method)
-        {
-            curl_setopt($ch , CURLOPT_POST , true);
-        }
-        else {
-            curl_setopt($ch , CURLOPT_CUSTOMREQUEST , $method);
-        }
+            if ($ch === false) {
+                throw new Exception('failed to initialize');
+            }
 
-        $response = curl_exec($ch);
 
-        if ($this->_debug)
-        {
-            echo $response;
-            echo "\n\n";
-        }
+            curl_setopt($ch , CURLOPT_URL , $this->_uri.$path);
+            curl_setopt($ch , CURLOPT_HTTPHEADER , $this->getHeaders());
+            curl_setopt($ch , CURLOPT_TIMEOUT , $this->_timeout);
+            curl_setopt($ch , CURLOPT_HEADER , 1);
+            curl_setopt($ch , CURLOPT_RETURNTRANSFER , 1);
+            curl_setopt($ch , CURLOPT_FOLLOWLOCATION , 1);
+            curl_setopt($ch , CURLOPT_COOKIE , $this->getMyCookie());
+            curl_setopt($ch , CURLOPT_HTTP_VERSION , CURL_HTTP_VERSION_1_1);
 
-        $this->parseMyCookie($response);
-        $httpcode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-        $body = $this->parseBody($ch, $response);
+            if (jsonObject != null && ('POST' == $method || 'PUT' == $method))
+            {
+                echo "WHY WITH DATA".$jsonObject."\n\n\n\n";
+                curl_setopt($ch , CURLOPT_CUSTOMREQUEST , $method);
+                curl_setopt($ch , CURLOPT_POSTFIELDS , $jsonObject);
+            } else {
+                curl_setopt($ch , CURLOPT_CUSTOMREQUEST , $method);
+            }
 
-        curl_close($ch);
+            $response = curl_exec($ch);
 
-        return $body;
+            if ($response === false) {
+                echo curl_error($ch);
+                throw new Exception(curl_error($ch), curl_errno($ch));
+            }
+
+
+            if ($this->_debug)
+            {
+                echo $response;
+                echo "\n\n";
+            }
+
+            $this->parseMyCookie($response);
+            $body = $this->parseBody($ch, $response);
+
+
+            curl_close($ch);
+
+            return $body;
+        } catch(Exception $e) {
+             trigger_error(sprintf(
+                 'Curl failed with error #%d: %s',
+                 $e->getCode(), $e->getMessage()),
+                 E_USER_ERROR);
+         }
     }
 
     public function CustomerLogin($email, $password)
@@ -147,35 +157,35 @@ class API
         $customer["password"] = $password;
         $loginData = array("customer" => $customer);
 
-        $loginResponse = $this->execute(POST,  "customers/login", json_encode($loginData));
+        $loginResponse = $this->execute('POST',  "customers/login", json_encode($loginData));
 
         return $loginResponse;
     }
 
     public function GetCustomer()
     {
-        $getCustomerResponse = $this->execute(GET, "customers");
+        $getCustomerResponse = $this->execute('GET', "customers");
 
         return $getCustomerResponse;
     }
 
     public function GetDefaultPaymentOptions()
     {
-        $getCustomerResponse = $this->execute(GET, "customers/payment-options");
+        $getCustomerResponse = $this->execute('GET', "customers/payment-options");
 
         return $getCustomerResponse;
     }
 
     public function GetMerchants()
     {
-        $merchantResponse = $this->execute(GET, "merchants/sell");
+        $merchantResponse = $this->execute('GET', "merchants/sell");
 
         return $merchantResponse;
     }
 
     public function RetrieveCart()
     {
-        $getCartResponse = $this->execute(GET, "carts");
+        $getCartResponse = $this->execute('GET', "carts");
 
         return $getCartResponse;
     }
@@ -184,14 +194,14 @@ class API
     {
         $createCartObj = array("action" => "sell");
 
-        $createCartResponse = $this->execute(POST, "carts", json_encode($createCartObj));
+        $createCartResponse = $this->execute('POST', "carts", json_encode($createCartObj));
 
         return $createCartResponse;
     }
 
     public function DeleteCart($cartID)
     {
-        $deleleteCartResponse = $this->execute(DELETE, "carts/" . $cartID);
+        $deleleteCartResponse = $this->execute('DELETE', "carts/" . $cartID);
 
         return $deleleteCartResponse;
     }
@@ -218,7 +228,7 @@ class API
         }
 
         $card = array("card" => $addCard);
-        $addCardResponse = $this->execute(POST, "carts/" . $cartID . "/cards", json_encode($card));
+        $addCardResponse = $this->execute('POST', "carts/" . $cartID . "/cards", json_encode($card));
 
         return $addCardResponse;
     }
@@ -248,14 +258,14 @@ class API
         }
 
         $card = array("card" => $updateCard);
-        $updateCardResponse = $this->execute(PUT, "carts/" . $cartID . "/cards/" + $cardID, json_encode($card));
+        $updateCardResponse = $this->execute('PUT', "carts/" . $cartID . "/cards/" + $cardID, json_encode($card));
 
         return $updateCardResponse;
     }
 
     public function DeleteCardInCart($cartID, $cardID)
     {
-        $deleteCardResponse = $this->execute(DELETE, "carts/" . $cartID . "/cards/" . $cardID);
+        $deleteCardResponse = $this->execute('DELETE', "carts/" . $cartID . "/cards/" . $cardID);
 
         return $deleteCardResponse;
     }
@@ -288,7 +298,7 @@ class API
           "paymentDetails" => $paymentDetails
         );
 
-        $orderReponse = $this->execute(POST, "orders", json_encode($order));
+        $orderReponse = $this->execute('POST', "orders", json_encode($order));
 
         return $orderReponse;
     }
@@ -296,42 +306,42 @@ class API
 
     public function GetOrder($orderID)
     {
-        $getOrderResponse = $this->execute(GET, "orders/". $orderID);
+        $getOrderResponse = $this->execute('GET', "orders/". $orderID);
 
         return $getOrderResponse;
     }
 
     public function GetAllOrders()
     {
-        $getOrdersResponse = $this->execute(GET, "orders/sell");
+        $getOrdersResponse = $this->execute('GET', "orders/sell");
 
         return $getOrdersResponse;
     }
 
     public function GetOrderCards($orderID)
     {
-        $getOrdersCardsResponse = $this->execute(GET, "cards/sell?orderId=". $orderID);
+        $getOrdersCardsResponse = $this->execute('GET', "cards/sell?orderId=". $orderID);
 
         return $getOrdersCardsResponse;
     }
 
     public function GetAllCards()
     {
-        $getAllCardsResponse = $this->execute(GET, "cards/sell");
+        $getAllCardsResponse = $this->execute('GET', "cards/sell");
 
         return $getAllCardsResponse;
     }
 
     public function GetAllPayments()
     {
-        $getAllPaymentsResponse = $this->execute(GET, "payments/sell");
+        $getAllPaymentsResponse = $this->execute('GET', "payments/sell");
 
         return $getAllPaymentsResponse;
     }
 
     public function GetPayment($paymentID)
     {
-        $getPaymentResponse = $this->execute(GET, "payments/sell/" . $paymentID);
+        $getPaymentResponse = $this->execute('GET', "payments/sell/" . $paymentID);
 
         return $getPaymentResponse;
     }
