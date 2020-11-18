@@ -62,6 +62,7 @@ class API
     {
         $headerSize = curl_getinfo($ch, CURLINFO_HEADER_SIZE);
         $body       = substr($response, $headerSize);
+
         if (strpos($body, '{') === 0)
         {
             return json_decode($body);
@@ -70,6 +71,7 @@ class API
         if (!empty($body)) {
           return $body;
         }
+
         return "OK";
     }
 
@@ -114,7 +116,6 @@ class API
 
             if (jsonObject != null && ('POST' == $method || 'PUT' == $method))
             {
-                echo "WHY WITH DATA".$jsonObject."\n\n\n\n";
                 curl_setopt($ch , CURLOPT_CUSTOMREQUEST , $method);
                 curl_setopt($ch , CURLOPT_POSTFIELDS , $jsonObject);
             } else {
@@ -124,7 +125,6 @@ class API
             $response = curl_exec($ch);
 
             if ($response === false) {
-                echo curl_error($ch);
                 throw new Exception(curl_error($ch), curl_errno($ch));
             }
 
